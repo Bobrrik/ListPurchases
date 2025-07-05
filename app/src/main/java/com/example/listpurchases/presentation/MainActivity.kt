@@ -21,12 +21,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
 
-
         setupRecyclerView()
         viewModel.shopList.observe(this) {
             shopAdapter.submitList(it)
         }
+        onClick()
+    }
 
+    private fun onClick() = with(binding) {
+        buttonAddShopItem.setOnClickListener {
+            val intent = ShopItemActivity.intentAddMod(this@MainActivity)
+            startActivity(intent)
+        }
     }
 
     private fun setupRecyclerView() = with(binding) {
@@ -54,7 +60,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupOnClickListener() {
         shopAdapter.onShopItemClickListener = {
-            it
+            val intent = ShopItemActivity.intentEditMod(this@MainActivity, it.id)
+            startActivity(intent)
         }
     }
 
