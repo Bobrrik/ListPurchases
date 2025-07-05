@@ -45,16 +45,16 @@ class ShopItemViewModel : ViewModel() {
     }
 
     fun editShopItem(_name: String?, _count: String?) {
+
         val name = parseName(_name)
         val count = parseCount(_count)
-
-        if (validateInput(name, count)) {
+        val fieldsValid = validateInput(name, count)
+        if (fieldsValid) {
             _shopItem.value?.let {
                 val item = it.copy(name = name, count = count)
                 editItemUseCase.editItem(item)
                 finishWork()
             }
-
         }
     }
 
