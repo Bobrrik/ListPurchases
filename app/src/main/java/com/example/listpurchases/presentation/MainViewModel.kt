@@ -1,6 +1,5 @@
 package com.example.listpurchases.presentation
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.listpurchases.data.ShopListRepositoryImpl
 import com.example.listpurchases.domain.ShopItem
@@ -17,11 +16,11 @@ class MainViewModel : ViewModel() {
 
     val shopList = getShopListUseCase.getShopList()
 
-    fun deleteShopList(item: ShopItem) {
+    fun deleteShopItem(item: ShopItem) {
         deleteShopListUseCase.deleteItem(item)
     }
 
-    fun addShopList(item: ShopItem) {
+    fun editShopItem(item: ShopItem) {
         editShopListUseCase.editItem(item.copy(enabled = !item.enabled))
     }
 }
