@@ -104,7 +104,8 @@ class ShopItemFragment : Fragment() {
 
     private fun parseParams() {
         val args = requireArguments()
-        if (args.containsKey(SCREEN_MODE)) throw RuntimeException("Param screen mode is absent")
+
+        if (!args.containsKey(SCREEN_MODE)) throw RuntimeException("Param screen mode is absent")
 
         val mode = args.getString(SCREEN_MODE)
         if (mode !=MODE_EDIT && mode != MODE_ADD) throw RuntimeException("Unknown screen mode $mode")

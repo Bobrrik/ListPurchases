@@ -2,84 +2,118 @@ package com.example.listpurchases.presentation
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.ItemTouchHelper.LEFT
-import androidx.recyclerview.widget.ItemTouchHelper.RIGHT
-import androidx.recyclerview.widget.ItemTouchHelper.SimpleCallback
 import androidx.recyclerview.widget.RecyclerView
+import com.example.listpurchases.R
 import com.example.listpurchases.databinding.ActivityMainBinding
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMainBinding
-    private lateinit var shopAdapter: ShopListAdapter
     private lateinit var viewModel: MainViewModel
+    private lateinit var shopListAdapter: ShopListAdapter
+    private lateinit var binding : ActivityMainBinding
+    private var shopItemContainer: FragmentContainerView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        binding = ActivityMainBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        shopItemContainer = findViewById(R.id.shop_item_container)
 
         setupRecyclerView()
-        viewModel.shopList.observe(this) {
-            shopAdapter.submitList(it)
-        }
+        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+
+        observe()
         onClick()
     }
 
-    private fun onClick() = with(binding) {
-        buttonAddShopItem.setOnClickListener {
-            val intent = ShopItemActivity.intentAddMod(this@MainActivity)
-            startActivity(intent)
+    private fun observe() {
+        viewModel.shopList.observe(this) {
+            shopListAdapter.submitList(it)
         }
     }
 
-    private fun setupRecyclerView() = with(binding) {
-        shopAdapter = ShopListAdapter()
-        rvShopList.adapter = shopAdapter
-        rvShopList.recycledViewPool.setMaxRecycledViews(
-            ShopListAdapter.ENABLED_ON,
-            ShopListAdapter.MAX_POOL_SIZE
-        )
-        rvShopList.recycledViewPool.setMaxRecycledViews(
-            ShopListAdapter.ENABLED_OFF,
-            ShopListAdapter.MAX_POOL_SIZE
-        )
-
-        setupLongClickListener()
-        setupOnClickListener()
-        setupSwipeDelete()
-    }
-
-    private fun setupLongClickListener() {
-        shopAdapter.onShopItemLongClickListener = {
-            viewModel.editShopItem(it)
-        }
-    }
-
-    private fun setupOnClickListener() {
-        shopAdapter.onShopItemClickListener = {
-            val intent = ShopItemActivity.intentEditMod(this@MainActivity, it.id)
-            startActivity(intent)
-        }
-    }
-
-    private fun setupSwipeDelete() {
-        val callback = object : SimpleCallback(0, LEFT or RIGHT) {
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val item = shopAdapter.currentList[viewHolder.adapterPosition]
-                viewModel.deleteShopItem(item)
+    private fun onClick() {
+       binding.buttonAddShopItem.setOnClickListener {
+            if (isOnePaneMode()) {
+                val intent = ShopItemActivity.intentAddMod(this)
+                startActivity(intent)
+            } else {
+                launchFragment(ShopItemFragment.newInstanceAddItem())
             }
+        }
+    }
+
+    private fun isOnePaneMode(): Boolean {
+        return shopItemContainer == null
+    }
+
+    private fun launchFragment(fragment: Fragment) {
+        supportFragmentManager.popBackStack()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.shop_item_container, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    private fun setupRecyclerView() {
+        with(binding.rvShopList) {
+            shopListAdapter = ShopListAdapter()
+            adapter = shopListAdapter
+            recycledViewPool.setMaxRecycledViews(
+                ShopListAdapter.ENABLED_ON,
+                ShopListAdapter.MAX_POOL_SIZE
+            )
+            recycledViewPool.setMaxRecycledViews(
+                ShopListAdapter.ENABLED_OFF,
+                ShopListAdapter.MAX_POOL_SIZE
+            )
+        }
+        setupLongClickListener()
+        setupClickListener()
+        setupSwipeListener()
+    }
+
+    private fun setupSwipeListener() {
+        val callback = object : ItemTouchHelper.SimpleCallback(
+            0,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ) {
 
             override fun onMove(
-                recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
             ): Boolean {
                 return false
             }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val item = shopListAdapter.currentList[viewHolder.adapterPosition]
+                viewModel.deleteShopItem(item)
+            }
         }
         val itemTouchHelper = ItemTouchHelper(callback)
         itemTouchHelper.attachToRecyclerView(binding.rvShopList)
+    }
+
+    private fun setupClickListener() {
+        shopListAdapter.onShopItemClickListener = {
+            if (isOnePaneMode()) {
+                val intent = ShopItemActivity.intentEditMod(this, it.id)
+                startActivity(intent)
+            } else {
+                launchFragment(ShopItemFragment.newInstanceEditItem(it.id))
+            }
+        }
+    }
+
+    private fun setupLongClickListener() {
+        shopListAdapter.onShopItemLongClickListener = {
+            viewModel.changeEnableState(it)
+        }
     }
 }
