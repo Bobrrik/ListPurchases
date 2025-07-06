@@ -10,7 +10,7 @@ import com.example.listpurchases.domain.use_case.EditItemUseCase
 import com.example.listpurchases.domain.use_case.GetItemUseCase
 
 class ShopItemViewModel : ViewModel() {
-    private val repository = ShopListRepositoryImpl()
+    private val repository = ShopListRepositoryImpl
 
     private val getShopItemUseCase = GetItemUseCase(repository)
     private val addShopItemUseCase = AddShopItemUseCase(repository)

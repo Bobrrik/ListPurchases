@@ -3,17 +3,14 @@ package com.example.listpurchases.presentation
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
+import com.example.listpurchases.R
 import com.example.listpurchases.databinding.ActivityShopItemBinding
 import com.example.listpurchases.domain.ShopItem
 
+
 class ShopItemActivity : AppCompatActivity() {
     private lateinit var binding: ActivityShopItemBinding
-    private lateinit var viewModel: ShopItemViewModel
     private var screenMode = MODE_UNKNOWN
     private var shopItemId = ShopItem.UNDEFINED_ID
 
@@ -23,74 +20,19 @@ class ShopItemActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         parsIntent()
-        viewModel = ViewModelProvider(this).get(ShopItemViewModel::class.java)
 
         launchRightMode()
-        observeViewModel()
-        addTextChangeListeners()
-    }
-
-    private fun observeViewModel() {
-        viewModel.errorInputCount.observe(this) {
-            if (it) binding.tilCount.error = "не корректное количество"
-            else binding.tilCount.error = null
-        }
-        viewModel.errorInputName.observe(this) {
-            if (it) binding.tilName.error = "не корректное имя"
-            else binding.tilCount.error = null
-        }
-        viewModel.closeScreen.observe(this) { finish() }
     }
 
     private fun launchRightMode() {
-        when (screenMode) {
-            MODE_EDIT -> launchEditMode()
-            MODE_ADD -> launchAddMode()
+        val fragment = when (screenMode) {
+            MODE_EDIT -> ShopItemFragment.newInstanceEditItem(shopItemId)
+            MODE_ADD -> ShopItemFragment.newInstanceAddItem()
+            else -> throw RuntimeException("Unknown screen mode $screenMode")
         }
-    }
-
-    private fun launchAddMode() = with(binding) {
-        saveButton.setOnClickListener {
-            Log.d("MyTAG", "кликай")
-            val name = binding.etName.text?.toString()
-            val count = binding.etCount.text?.toString()
-            viewModel.addShopItem(name, count)
-        }
-    }
-
-    private fun launchEditMode()  {
-        viewModel.getShopItem(shopItemId)
-
-        viewModel.shopItem.observe(this) {
-            binding.etName.setText(it.name)
-            binding.etCount.setText(it.count.toString())
-        }
-
-       binding.saveButton.setOnClickListener {
-            val name = binding.etName.text?.toString()
-            val count = binding.etCount.text?.toString()
-
-           viewModel.editShopItem(name, count)
-        }
-    }
-
-    private fun addTextChangeListeners() = with(binding) {
-        etName.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun afterTextChanged(s: Editable?) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                viewModel.resetErrorName()
-            }
-        })
-        etCount.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun afterTextChanged(s: Editable?) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                viewModel.resetErrorCount()
-            }
-        })
+        supportFragmentManager.beginTransaction()
+            .add(R.id.shop_item_container, fragment)
+            .commit()
     }
 
     private fun parsIntent() {
@@ -111,6 +53,7 @@ class ShopItemActivity : AppCompatActivity() {
         private const val MODE_EDIT = "extra_edit"
         private const val MODE_ADD = "mode_add"
         private const val MODE_UNKNOWN = ""
+
 
         fun intentEditMod(context: Context, itemId: Int): Intent {
             val intent = Intent(context, ShopItemActivity::class.java)

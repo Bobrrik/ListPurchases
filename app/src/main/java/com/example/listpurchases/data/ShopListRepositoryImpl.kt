@@ -6,14 +6,14 @@ import com.example.listpurchases.domain.ShopItem
 import com.example.listpurchases.domain.ShopListRepository
 import kotlinx.coroutines.flow.asFlow
 
-class ShopListRepositoryImpl : ShopListRepository {
+object ShopListRepositoryImpl : ShopListRepository {
 
     private val shopListLD = MutableLiveData<List<ShopItem>>()
     private val shopList = sortedSetOf<ShopItem>(Comparator { o1, o2 -> o1.id.compareTo(o2.id) })
     private var autoIncrementId = 0
 
     init {
-        for (i in 0 until 100) {
+        for (i in 0 until 30) {
             val item = ShopItem(name = "Product$i", count = i, enabled = true)
             addItem(item)
         }
