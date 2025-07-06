@@ -9,7 +9,7 @@ import com.example.listpurchases.databinding.ActivityShopItemBinding
 import com.example.listpurchases.domain.ShopItem
 
 
-class ShopItemActivity : AppCompatActivity() {
+class ShopItemActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedListener {
     private lateinit var binding: ActivityShopItemBinding
     private var screenMode = MODE_UNKNOWN
     private var shopItemId = ShopItem.UNDEFINED_ID
@@ -21,6 +21,10 @@ class ShopItemActivity : AppCompatActivity() {
 
         parsIntent()
         if (savedInstanceState == null) launchRightMode()
+    }
+
+    override fun onEditingFinished() {
+        finish()
     }
 
     private fun launchRightMode() {

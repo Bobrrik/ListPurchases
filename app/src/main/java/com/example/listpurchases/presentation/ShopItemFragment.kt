@@ -1,5 +1,6 @@
 package com.example.listpurchases.presentation
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -18,6 +19,7 @@ class ShopItemFragment : Fragment() {
     private var shopItemId: Int = ShopItem.UNDEFINED_ID
     lateinit var binding: FragmentShopItemBinding
     private lateinit var viewModel: ShopItemViewModel
+    private lateinit var onEditingFinishedListener: OnEditingFinishedListener
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -27,6 +29,7 @@ class ShopItemFragment : Fragment() {
         binding = FragmentShopItemBinding.inflate(inflater, container, false)
         return binding.root
     }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -39,6 +42,16 @@ class ShopItemFragment : Fragment() {
         addTextChangeListeners()
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is OnEditingFinishedListener) {
+            onEditingFinishedListener = context
+        }
+        else {
+            throw RuntimeException("Activity must implement OnEditingFinishedListener")
+        }
+    }
+
     private fun observeViewModel() {
         viewModel.errorInputCount.observe(viewLifecycleOwner) {
             if (it) binding.tilCount.error = "не корректное количество"
@@ -48,7 +61,9 @@ class ShopItemFragment : Fragment() {
             if (it) binding.tilName.error = "не корректное имя"
             else binding.tilCount.error = null
         }
-        viewModel.closeScreen.observe(viewLifecycleOwner) { requireActivity().onBackPressed() }
+        viewModel.closeScreen.observe(viewLifecycleOwner) {
+            activity?.onBackPressed()
+        }
     }
 
     private fun launchRightMode() {
@@ -108,12 +123,16 @@ class ShopItemFragment : Fragment() {
         if (!args.containsKey(SCREEN_MODE)) throw RuntimeException("Param screen mode is absent")
 
         val mode = args.getString(SCREEN_MODE)
-        if (mode !=MODE_EDIT && mode != MODE_ADD) throw RuntimeException("Unknown screen mode $mode")
+        if (mode != MODE_EDIT && mode != MODE_ADD) throw RuntimeException("Unknown screen mode $mode")
         screenMode = mode
         if (screenMode == MODE_EDIT) {
             if (!args.containsKey(SHOP_ITEM_ID)) throw RuntimeException("Unknown screen mode $mode")
             shopItemId = args.getInt(SHOP_ITEM_ID, ShopItem.UNDEFINED_ID)
         }
+    }
+
+    interface OnEditingFinishedListener {
+        fun onEditingFinished()
     }
 
     companion object {
