@@ -1,4 +1,4 @@
-package com.example.listpurchases.presentation
+package com.example.listpurchases.presentation.view
 
 import android.content.Context
 import android.content.Intent

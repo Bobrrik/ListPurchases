@@ -1,4 +1,4 @@
-package com.example.listpurchases.presentation
+package com.example.listpurchases.presentation.view
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -9,7 +9,8 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.listpurchases.R
 import com.example.listpurchases.databinding.ActivityMainBinding
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.example.listpurchases.presentation.viewModel.MainViewModel
+import com.example.listpurchases.presentation.ShopListAdapter
 
 class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedListener {
     private lateinit var viewModel: MainViewModel

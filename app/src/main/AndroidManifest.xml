@@ -12,11 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ListPurchases">
         <activity
-            android:name=".presentation.ShopItemActivity"
+            android:name=".presentation.view.ShopItemActivity"
             android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
-            android:name=".presentation.MainActivity"
+            android:name=".presentation.view.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
