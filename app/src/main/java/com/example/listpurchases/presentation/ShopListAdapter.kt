@@ -2,8 +2,12 @@ package com.example.listpurchases.presentation
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.ListAdapter
 import com.example.listpurchases.R
+import com.example.listpurchases.databinding.ShopItemOffBinding
+import com.example.listpurchases.databinding.ShopItemOnBinding
 import com.example.listpurchases.domain.ShopItem
 
 class ShopListAdapter : ListAdapter<ShopItem, ShopItemViewHolder>(ShopItemDiffCallback()) {
@@ -18,24 +22,37 @@ class ShopListAdapter : ListAdapter<ShopItem, ShopItemViewHolder>(ShopItemDiffCa
             ENABLED_ON -> R.layout.shop_item_on
             else -> throw RuntimeException("Unknown view type: $viewType")
         }
-        val view = LayoutInflater.from(parent.context).inflate(layout, parent, false)
-        return ShopItemViewHolder(view)
+        val binding =
+            DataBindingUtil.inflate<ViewDataBinding>(
+                LayoutInflater.from(parent.context),
+                layout,
+                parent,
+                false
+            )
+        return ShopItemViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ShopItemViewHolder, position: Int) {
         val shopItem = getItem(position)
-
-        holder.view.setOnLongClickListener {
+        val binding = holder.binding
+        binding.root.setOnLongClickListener {
             onShopItemLongClickListener?.invoke(shopItem)
             true
         }
-        holder.view.setOnClickListener {
+        binding.root.setOnClickListener {
             onShopItemClickListener?.invoke(shopItem)
         }
+        when (binding) {
+             is ShopItemOnBinding -> {
+                binding.name.text = shopItem.name
+                binding.count.text  = shopItem.count.toString()
+            }
 
-        holder.tvName.text = shopItem.name
-        holder.tvCount.text = shopItem.count.toString()
-
+            is ShopItemOffBinding -> {
+                binding.name.text  = shopItem.name
+                binding.count.text  = shopItem.count.toString()
+            }
+        }
     }
 
     override fun getItemViewType(position: Int): Int {

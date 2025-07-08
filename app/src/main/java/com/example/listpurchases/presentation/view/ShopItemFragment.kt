@@ -58,10 +58,12 @@ class ShopItemFragment : Fragment() {
             if (it) binding.tilCount.error = "не корректное количество"
             else binding.tilCount.error = null
         }
+
         viewModel.errorInputName.observe(viewLifecycleOwner) {
             if (it) binding.tilName.error = "не корректное имя"
             else binding.tilCount.error = null
         }
+
         viewModel.closeScreen.observe(viewLifecycleOwner) {
             activity?.onBackPressed()
         }
